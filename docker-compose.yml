@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Frontend Service (Nginx)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: Myportfolio-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ecommerce-network
+    environment:
+      - NODE_ENV=production
+
+  # Backend Service (Node.js/Express)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: Myportfolio-backend
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+    environment:
+      - DB_USER=ecommerce_user
+      - DB_PASSWORD=ecommerce_pass
+      - DB_HOST=db
+      - DB_NAME=ecommerce_db
+      - DB_PORT=5432
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+  # Database Service (PostgreSQL)
+  db:
+    image: postgres:14-alpine
+    container_name: Myportfolio-db
+    environment:
+      POSTGRES_USER: ecommerce_user
+      POSTGRES_PASSWORD: ecommerce_pass
+      POSTGRES_DB: ecommerce_db
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ecommerce_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Python Flask Application (Optional)
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    container_name: Myportfolio-python-app
+    ports:
+      - "8080:8080"
+    networks:
+      - ecommerce-network
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+    driver: local
+
+networks:
+  ecommerce-network:
+    driver: bridge

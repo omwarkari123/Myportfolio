@@ -1,0 +1,20 @@
+# Node
+node_modules/
+frontend/node_modules/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# AWS CLI
+aws/dist/
+awscliv2.zip
+
+# Environment
+.env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup

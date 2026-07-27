@@ -1,0 +1,23 @@
+<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:0.2" />
+    </linearGradient>
+    <linearGradient id="avatarGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#38bdf8;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#818cf8;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Circular background -->
+  <circle cx="80" cy="80" r="78" fill="url(#bgGradient)" stroke="rgba(56, 189, 248, 0.4)" stroke-width="2"/>
+  
+  <!-- Placeholder avatar -->
+  <circle cx="80" cy="50" r="25" fill="url(#avatarGradient)"/>
+  <path d="M 55 100 Q 55 85 80 85 Q 105 85 105 100" fill="url(#avatarGradient)" opacity="0.8"/>
+  
+  <!-- Initials "OW" -->
+  <text x="80" y="58" font-size="18" font-weight="bold" fill="white" text-anchor="middle" dominant-baseline="middle">OW</text>
+</svg>
