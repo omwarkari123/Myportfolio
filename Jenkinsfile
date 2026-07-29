@@ -12,7 +12,7 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/OmWarkari-DevOps/Myportfolio.git'
+                    url: 'https://github.com/omwarkari123/Myportfolio.git'
             }
         }
 
