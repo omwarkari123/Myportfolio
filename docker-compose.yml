@@ -1,72 +1,80 @@
 version: '3.8'
 
 services:
-  # Frontend Service (Nginx)
   frontend:
+    image: ${DOCKERHUB_USER:-omwarkri123}/myportfolio-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: Myportfolio-frontend
+    container_name: myportfolio-frontend
     ports:
       - "80:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_started
     networks:
-      - ecommerce-network
+      - portfolio-network
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
+    restart: unless-stopped
 
-  # Backend Service (Node.js/Express)
   backend:
+    image: ${DOCKERHUB_USER:-omwarkri123}/myportfolio-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: Myportfolio-backend
+    container_name: myportfolio-backend
     ports:
       - "5000:5000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      - DB_USER=ecommerce_user
-      - DB_PASSWORD=ecommerce_pass
-      - DB_HOST=db
-      - DB_NAME=ecommerce_db
-      - DB_PORT=5432
+      DB_USER: ${DB_USER:-ecommerce_user}
+      DB_PASSWORD: ${DB_PASSWORD:-ecommerce_pass}
+      DB_HOST: ${DB_HOST:-db}
+      DB_NAME: ${DB_NAME:-ecommerce_db}
+      DB_PORT: ${DB_PORT:-5432}
+      NODE_ENV: production
     networks:
-      - ecommerce-network
+      - portfolio-network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"require('http').get('http://localhost:5000', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
 
-  # Database Service (PostgreSQL)
   db:
     image: postgres:14-alpine
-    container_name: Myportfolio-db
+    container_name: myportfolio-db
     environment:
-      POSTGRES_USER: ecommerce_user
-      POSTGRES_PASSWORD: ecommerce_pass
-      POSTGRES_DB: ecommerce_db
+      POSTGRES_USER: ${DB_USER:-ecommerce_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-ecommerce_pass}
+      POSTGRES_DB: ${DB_NAME:-ecommerce_db}
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     networks:
-      - ecommerce-network
+      - portfolio-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ecommerce_user"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-ecommerce_user} -d ${DB_NAME:-ecommerce_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # Python Flask Application (Optional)
   python-app:
+    image: ${DOCKERHUB_USER:-omwarkri123}/myportfolio-python:${IMAGE_TAG:-latest}
     build:
       context: .
       dockerfile: Dockerfile.python
-    container_name: Myportfolio-python-app
+    container_name: myportfolio-python-app
     ports:
       - "8080:8080"
     networks:
-      - ecommerce-network
+      - portfolio-network
     restart: unless-stopped
 
 volumes:
@@ -74,5 +82,5 @@ volumes:
     driver: local
 
 networks:
-  ecommerce-network:
+  portfolio-network:
     driver: bridge

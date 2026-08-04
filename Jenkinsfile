@@ -2,35 +2,49 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_USER = "omwarkri123"
-        IMAGE = "myportfolio"
-        EC2_HOST = "65.1.3.190"
+        DOCKERHUB_USER = 'omwarkri123'
+        IMAGE_NAME = 'myportfolio'
+        REPO_URL = 'https://github.com/omwarkari123/Myportfolio.git'
+        EC2_HOST = '65.1.3.190'
+        EC2_USER = 'ubuntu'
+        IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main',
-                    url: 'https://github.com/omwarkari123/Myportfolio.git'
+                git branch: 'main', url: env.REPO_URL
             }
         }
 
-        stage('Build Backend') {
+        stage('Frontend Build Validation') {
             steps {
-                sh 'docker build -t $DOCKERHUB_USER/$IMAGE:backend-v1 ./backend'
+                sh '''
+                    cd frontend
+                    npm ci
+                    npm run build
+                '''
             }
         }
 
-        stage('Build Frontend') {
+        stage('Backend Dependency Validation') {
             steps {
-                sh 'docker build -t $DOCKERHUB_USER/$IMAGE:frontend-v1 ./frontend'
+                steps {
+                    sh '''
+                        cd backend
+                        npm ci
+                    '''
+                }
             }
         }
 
-        stage('Build Python') {
+        stage('Build Docker Images') {
             steps {
-                sh 'docker build -t $DOCKERHUB_USER/$IMAGE:python-v1 -f Dockerfile.python .'
+                sh '''
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:frontend-${IMAGE_TAG} ./frontend
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:backend-${IMAGE_TAG} ./backend
+                    docker build -t ${DOCKERHUB_USER}/${IMAGE_NAME}:python-${IMAGE_TAG} -f Dockerfile.python .
+                '''
             }
         }
 
@@ -38,16 +52,14 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
-                    usernameVariable: 'USER',
-                    passwordVariable: 'PASS'
+                    usernameVariable: 'DOCKERHUB_USERNAME',
+                    passwordVariable: 'DOCKERHUB_PASSWORD'
                 )]) {
-
                     sh '''
-                    echo $PASS | docker login -u $USER --password-stdin
-
-                    docker push omwarkri123/myportfolio:backend-v1
-                    docker push omwarkri123/myportfolio:frontend-v1
-                    docker push omwarkri123/myportfolio:python-v1
+                        echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:frontend-${IMAGE_TAG}
+                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:backend-${IMAGE_TAG}
+                        docker push ${DOCKERHUB_USER}/${IMAGE_NAME}:python-${IMAGE_TAG}
                     '''
                 }
             }
@@ -57,26 +69,24 @@ pipeline {
             steps {
                 sshagent(['ec2-ssh']) {
                     sh '''
-                    scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@$EC2_HOST:/home/ubuntu/
+                        scp -o StrictHostKeyChecking=no docker-compose.yml ${EC2_USER}@${EC2_HOST}:/home/${EC2_USER}/docker-compose.yml
                     '''
                 }
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to EC2') {
             steps {
                 sshagent(['ec2-ssh']) {
-
                     sh '''
-                    ssh -o StrictHostKeyChecking=no ubuntu@$EC2_HOST << EOF
-
-                    docker login
-
-                    docker compose pull
-
-                    docker compose up -d
-
-                    EOF
+                        ssh -o StrictHostKeyChecking=no ${EC2_USER}@${EC2_HOST} <<EOF
+                        export DOCKERHUB_USER=${DOCKERHUB_USER}
+                        export IMAGE_NAME=${IMAGE_NAME}
+                        export IMAGE_TAG=${IMAGE_TAG}
+                        docker login -u "${DOCKERHUB_USER}" --password-stdin <<< "${DOCKERHUB_PASSWORD}"
+                        docker compose -f /home/${EC2_USER}/docker-compose.yml pull
+                        docker compose -f /home/${EC2_USER}/docker-compose.yml up -d --remove-orphans
+                        EOF
                     '''
                 }
             }
