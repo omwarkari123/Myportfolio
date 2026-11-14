@@ -1,14 +1,17 @@
 import './App.css'
+import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+import { FaGithub, FaLinkedinIn, FaAws, FaDocker, FaJenkins, FaPython, FaLinux } from "react-icons/fa";
+import { SiTerraform, SiAnsible, SiPrometheus } from "react-icons/si";
 
 const skillCategories = [
-  { title: 'Cloud', items: 'AWS — EC2, EKS, ECS Fargate, ECR, S3, VPC, IAM, RDS, Route 53, ALB, ACM, CloudWatch' },
-  { title: 'Containers', items: 'Docker, Kubernetes (EKS), Helm, Amazon ECR, Docker Compose' },
-  { title: 'CI/CD', items: 'Jenkins, GitHub Actions, AWS CodePipeline, CodeBuild — end-to-end pipeline design' },
-  { title: 'IaC', items: 'Terraform, AWS CloudFormation — multi-resource AWS provisioning' },
-  { title: 'Config Mgmt', items: 'Ansible' },
-  { title: 'Monitoring', items: 'Prometheus, Grafana, AWS CloudWatch Logs & Alarms' },
-  { title: 'Languages', items: 'Python (Django), Bash scripting' },
-  { title: 'OS / VCS', items: 'Linux (Ubuntu), Git, GitHub' },
+  { title: 'Cloud', icon: FaAws, items: 'AWS — EC2, EKS, ECS Fargate, ECR, S3, VPC, IAM, RDS, Route 53, ALB, ACM, CloudWatch' },
+  { title: 'Containers', icon: FaDocker, items: 'Docker, Kubernetes (EKS), Helm, Amazon ECR, Docker Compose' },
+  { title: 'CI/CD', icon: FaJenkins, items: 'Jenkins, GitHub Actions, AWS CodePipeline, CodeBuild — end-to-end pipeline design' },
+  { title: 'IaC', icon: SiTerraform, items: 'Terraform, AWS CloudFormation — multi-resource AWS provisioning' },
+  { title: 'Config Mgmt', icon: SiAnsible, items: 'Ansible' },
+  { title: 'Monitoring', icon: SiPrometheus, items: 'Prometheus, Grafana, AWS CloudWatch Logs & Alarms' },
+  { title: 'Languages', icon: FaPython, items: 'Python (Django), Bash scripting' },
+  { title: 'OS / VCS', icon: FaLinux, items: 'Linux (Ubuntu), Git, GitHub' },
 ]
 
 const projects = [
@@ -74,18 +77,34 @@ function App() {
             <p className="hero-copy">
               I specialize in deploying containerized applications on AWS EKS and ECS Fargate, designing end-to-end CI/CD pipelines with Jenkins and GitHub Actions, and provisioning scalable infrastructure with Terraform. With hands-on production experience troubleshooting CrashLoopBackOff, probe failures, and zero-downtime deployments, I focus on automation, reliability, and observability.
             </p>
+
             <div className="contact-info">
-              <span>📧 owarkri710@gmail.com</span>
-              <span>📞 +91 7620290632</span>
-              <span>📍 Maharashtra, India</span>
+              <span><FiMail /> owarkri710@gmail.com</span>
+              <span><FiPhone /> +91 7620290632</span>
+              <span><FiMapPin /> Maharashtra, India</span>
             </div>
-            <div className="social-links">
-              <a href="https://github.com/omwarkri" target="_blank" rel="noreferrer">🔗 GitHub</a>
-              <a href="https://www.linkedin.com/in/om-warkri" target="_blank" rel="noreferrer">💼 LinkedIn</a>
-            </div>
+
             <div className="hero-actions">
               <a className="button primary" href="#projects">View Projects</a>
               <a className="button secondary" href="#contact">Get in Touch</a>
+              <a
+                href="https://github.com/omwarkari123"
+                target="_blank"
+                rel="noreferrer"
+                className="social-icon"
+                aria-label="GitHub profile"
+              >
+                <FaGithub />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/om-warkri-ab989b229/"
+                target="_blank"
+                rel="noreferrer"
+                className="social-icon"
+                aria-label="LinkedIn profile"
+              >
+                <FaLinkedinIn />
+              </a>
             </div>
           </div>
 
@@ -111,10 +130,12 @@ function App() {
         <section id="skills" className="section-card">
           <h2>Technical Skills</h2>
           <div className="skills-grid">
-            {skillCategories.map((category) => (
-              <div key={category.title} className="skill-category">
-                <h4>{category.title}</h4>
-                <p>{category.items}</p>
+            {skillCategories.map(({ title, icon: Icon, items }) => (
+              <div key={title} className="skill-category">
+                <h4>
+                  <Icon className="skill-icon" /> {title}
+                </h4>
+                <p>{items}</p>
               </div>
             ))}
           </div>
@@ -183,14 +204,48 @@ function App() {
         </section>
 
         <section id="contact" className="section-card contact-card">
-          <div>
+          <div className="contact-text">
+            <span className="contact-badge">
+              <span className="pulse-dot" /> Open to work
+            </span>
             <h2>Let's build something remarkable</h2>
-            <p>I'm actively seeking a Junior DevOps Engineer role to contribute to scalable, automated, and reliable cloud systems. Open to discussing DevOps strategies, cloud architecture, and infrastructure automation opportunities.</p>
+            <p>
+              I'm actively seeking a Junior DevOps Engineer role to contribute to
+              scalable, automated, and reliable cloud systems. Open to discussing
+              DevOps strategies, cloud architecture, and infrastructure automation
+              opportunities.
+            </p>
           </div>
+
           <div className="contact-actions">
-            <a href="mailto:owarkri710@gmail.com" className="button primary">Send Email</a>
-            <a href="https://github.com/omwarkri" target="_blank" rel="noreferrer" className="button secondary">View GitHub</a>
-            <a href="https://www.linkedin.com/in/om-warkri" target="_blank" rel="noreferrer" className="button secondary">Connect on LinkedIn</a>
+            <a
+              href="mailto:owarkri710@gmail.com"
+              className="icon-button email"
+              aria-label="Send email"
+              data-tooltip="Email"
+            >
+              <FiMail />
+            </a>
+            <a
+              href="https://github.com/omwarkari123"
+              target="_blank"
+              rel="noreferrer"
+              className="icon-button github"
+              aria-label="GitHub profile"
+              data-tooltip="GitHub"
+            >
+              <FaGithub />
+            </a>
+            <a
+              href="https://www.linkedin.com/in/om-warkri-ab989b229/"
+              target="_blank"
+              rel="noreferrer"
+              className="icon-button linkedin"
+              aria-label="LinkedIn profile"
+              data-tooltip="LinkedIn"
+            >
+              <FaLinkedinIn />
+            </a>
           </div>
         </section>
       </main>
